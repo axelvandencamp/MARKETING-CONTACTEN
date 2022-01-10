@@ -25,6 +25,17 @@ SELECT * FROM
 		JOIN crm_marketing_partner_type_rel mptr ON mptr.partner_type_id = p.id
 		JOIN res_crm_marketing_partner_type mpt ON mpt.id = mptr.name
 		LEFT OUTER JOIN res_crm_marketing_extra_info mei ON mei.info_id = p.id) SQ1
+	JOIN marketing._crm_partnerinfo() SQ2 ON SQ2.partner_id = SQ1.id
 WHERE NOT(info = 'n/a') AND p_type_id = 1
 ORDER BY SQ1.id, SQ1._date DESC	
-	
+
+-- ophalen verzendlijst --
+SELECT p.id, p.name, mptr.name p_type_id, mpt.name partner_type, mch.datetime::date _date, mcf.name status,
+	SQ1.*
+FROM res_partner p
+	JOIN crm_marketing_partner_type_rel mptr ON mptr.partner_type_id = p.id
+	JOIN res_crm_marketing_partner_type mpt ON mpt.id = mptr.name
+	LEFT OUTER JOIN res_crm_marketing_contact_history mch ON mch.history_id = p.id
+	LEFT OUTER JOIN res_crm_marketing_contact_fase mcf ON mcf.id = mch.contact_fase
+	JOIN marketing._crm_partnerinfo() SQ1 ON SQ1.partner_id = p.id	
+WHERE mptr.name = 1
