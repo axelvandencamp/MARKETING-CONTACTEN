@@ -1,0 +1,56 @@
+SELECT mpt.name, p.id, p.name, 
+		CASE WHEN u.id IN (513,260,487) THEN '' ELSE u.login END AS auteur, mcf.name status_fase, 
+		p.street2 huisnaam,
+	CASE
+		WHEN c.id = 21 AND p.crab_used = 'true' THEN ccs.name
+		ELSE p.street
+	END straat,
+	CASE
+		WHEN c.id = 21 AND p.crab_used = 'true' THEN p.street_nbr ELSE ''
+	END huisnummer, 
+	p.street_bus bus,
+	CASE
+		WHEN c.id = 21 AND p.crab_used = 'true' THEN cc.zip
+		ELSE p.zip
+	END postcode,
+	CASE 
+		WHEN c.id = 21 THEN cc.name ELSE p.city 
+	END woonplaats,
+	p.postbus_nbr postbus,
+	CASE
+		WHEN p.country_id = 21 AND substring(p.zip from '[0-9]+')::numeric BETWEEN 1000 AND 1299 THEN 'Brussel' 
+		WHEN p.country_id = 21 AND (substring(p.zip from '[0-9]+')::numeric BETWEEN 1500 AND 1999 OR substring(p.zip from '[0-9]+')::numeric BETWEEN 3000 AND 3499) THEN 'Vlaams Brabant'
+		WHEN p.country_id = 21 AND substring(p.zip from '[0-9]+')::numeric BETWEEN 2000 AND 2999  THEN 'Antwerpen' 
+		WHEN p.country_id = 21 AND substring(p.zip from '[0-9]+')::numeric BETWEEN 3500 AND 3999  THEN 'Limburg' 
+		WHEN p.country_id = 21 AND substring(p.zip from '[0-9]+')::numeric BETWEEN 8000 AND 8999  THEN 'West-Vlaanderen' 
+		WHEN p.country_id = 21 AND substring(p.zip from '[0-9]+')::numeric BETWEEN 9000 AND 9999  THEN 'Oost-Vlaanderen' 
+		WHEN p.country_id = 21 THEN 'Wallonië'
+		WHEN p.country_id = 166 THEN 'Nederland'
+		WHEN NOT(p.country_id IN (21,166)) THEN 'Buitenland niet NL'
+		ELSE 'andere'
+	END AS provincie,
+	_crm_land(c.id) land,
+	p.vat btwnummer,
+	cp.id contactpersoon_id, cp.name contactpersoon, cp.function functie, cp.email, COALESCE(cp.phone_work,cp.phone) telefoonnr, cp.mobile gsm
+FROM res_partner p
+	LEFT OUTER JOIN res_partner cp ON cp.parent_id = p.id
+	JOIN crm_marketing_partner_type_rel mptr ON mptr.partner_type_id = p.id
+	JOIN res_crm_marketing_partner_type mpt ON mpt.id = mptr.name
+	JOIN res_crm_marketing_contact_history mch ON mch.history_id = p.id AND mch.partner_type = mpt.id
+	JOIN res_crm_marketing_contact_fase mcf ON mcf.id = mch.contact_fase
+	JOIN res_users u ON u.id = mch.author
+	--land, straat, gemeente info
+	JOIN res_country c ON p.country_id = c.id
+	LEFT OUTER JOIN res_country_city_street ccs ON p.street_id = ccs.id
+	LEFT OUTER JOIN res_country_city cc ON p.zip_id = cc.id
+WHERE p.active AND mpt.name IN ('Bedrijven & verenigingen','Partner Bos voor Iedereen')
+
+/*
+SELECT * FROM res_partner WHERE id = 366463 LIMIT 10
+SELECT * FROM crm_marketing_partner_type_rel
+SELECT * FROM res_crm_marketing_partner_type
+SELECT * FROM res_crm_marketing_contact_fase
+SELECT * FROM res_crm_marketing_contact_history
+SELECT * FROM res_users WHERE login IN ('axel.vandencamp','jimmy.vanlooy','griet.vandendriessche')
+SELECT * FROM res_users WHERE login LIKE ('griet.vanden%')
+*/
