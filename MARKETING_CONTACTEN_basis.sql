@@ -1,6 +1,7 @@
 SELECT p.id, tr.* FROM crm_marketing_partner_type_rel tr
 	JOIN res_partner p ON p.id = tr.partner_type_id
 WHERE p.active = false AND tr.name = 2
+SELECT * FROM crm_marketing_partner_type_rel
 SELECT * FROM res_crm_marketing_partner_type
 SELECT * FROM res_crm_marketing_contact_history
 SELECT * FROM res_crm_marketing_contact_fase
