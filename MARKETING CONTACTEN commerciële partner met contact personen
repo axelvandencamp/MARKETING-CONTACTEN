@@ -1,5 +1,12 @@
-SELECT mpt.name, p.id, p.name, 
-		CASE WHEN u.id IN (513,260,487) THEN '' ELSE u.login END AS auteur, mcf.name status_fase, 
+SELECT DISTINCT p.id, p.name, 
+	dp.jaareerstegift jaar_eerste_gift, dp.jaarlaatstegift jaar_laatste_gift, dp.jarendonateur jaren_donateur,
+	dp.aantalgiften aantal_giften, dp.totaalgiften bedrag_totaal, dp.grootstegift grootste_gift, 
+	dp.avggiftenperjaar "#giften/jaar", dp.avgbedragperjaar "gem_gift/jaar",
+	p.vat btwnummer,
+	cp.id contactpersoon_id, cp.name contactpersoon, cp.function functie, cp.email, COALESCE(cp.phone_work,cp.phone) telefoonnr, cp.mobile gsm,
+	p2.lid, p2.donateur, p2.erflater, p2.commerciële_partner, p2.bos_partner, p2.major_donor, p2.schenker_grond,
+	p2.vrijwilliger, p2.bestuurder, p2.conservator, p2.aankoper,
+	--CASE WHEN u.id IN (513,260,487) THEN '' ELSE u.login END AS auteur, mcf.name status_fase, 
 		p.street2 huisnaam,
 	CASE
 		WHEN c.id = 21 AND p.crab_used = 'true' THEN ccs.name
@@ -29,21 +36,27 @@ SELECT mpt.name, p.id, p.name,
 		WHEN NOT(p.country_id IN (21,166)) THEN 'Buitenland niet NL'
 		ELSE 'andere'
 	END AS provincie,
-	_crm_land(c.id) land,
-	p.vat btwnummer,
-	cp.id contactpersoon_id, cp.name contactpersoon, cp.function functie, cp.email, COALESCE(cp.phone_work,cp.phone) telefoonnr, cp.mobile gsm
+	_crm_land(c.id) land
 FROM res_partner p
-	LEFT OUTER JOIN res_partner cp ON cp.parent_id = p.id
-	JOIN crm_marketing_partner_type_rel mptr ON mptr.partner_type_id = p.id
-	JOIN res_crm_marketing_partner_type mpt ON mpt.id = mptr.name
-	JOIN res_crm_marketing_contact_history mch ON mch.history_id = p.id AND mch.partner_type = mpt.id
-	JOIN res_crm_marketing_contact_fase mcf ON mcf.id = mch.contact_fase
-	JOIN res_users u ON u.id = mch.author
+	--partner info
+	JOIN marketing._m_dwh_partners p2 ON p2.partner_id = p.id
 	--land, straat, gemeente info
 	JOIN res_country c ON p.country_id = c.id
+	--marketing contacten info
+	LEFT OUTER JOIN crm_marketing_partner_type_rel mptr ON mptr.partner_type_id = p.id
+	LEFT OUTER JOIN res_crm_marketing_partner_type mpt ON mpt.id = mptr.name
+	LEFT OUTER JOIN res_crm_marketing_contact_history mch ON mch.history_id = p.id AND mch.partner_type = mpt.id
+	LEFT OUTER JOIN res_crm_marketing_contact_fase mcf ON mcf.id = mch.contact_fase
+	LEFT OUTER JOIN res_users u ON u.id = mch.author
+	--donateursprofiel info
+	LEFT OUTER JOIN marketing._m_dwh_donateursprofiel dp ON dp.partner_id = p.id
+	--contactpersoon
+	LEFT OUTER JOIN res_partner cp ON cp.parent_id = p.id
+	--adres info
 	LEFT OUTER JOIN res_country_city_street ccs ON p.street_id = ccs.id
 	LEFT OUTER JOIN res_country_city cc ON p.zip_id = cc.id
-WHERE p.active AND mpt.name IN ('Bedrijven & verenigingen','Partner Bos voor Iedereen')
+WHERE p.active AND mpt.name IN ('Partner Bos voor Iedereen')
+	--AND dp.avgbedragperjaar >= 5000
 
 /*
 SELECT * FROM res_partner WHERE id = 366463 LIMIT 10
