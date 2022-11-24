@@ -9,6 +9,8 @@ SELECT * FROM res_crm_marketing_contact_fase
 SELECT * FROM res_crm_marketing_extra_info -- WHERE info_id = 21362
 SELECT * FROM res_crm_marketing_sector
 
+SELECT * FROM res_users u WHERE u.login like 'linsay%'
+
 
 SELECT * FROM res_crm_marketing_contact_history mch WHERE mch.partner_type = 2
 
