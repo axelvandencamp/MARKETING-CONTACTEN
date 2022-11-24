@@ -6,7 +6,7 @@ SELECT DISTINCT p.id, p.name,
 	cp.id contactpersoon_id, cp.name contactpersoon, cp.function functie, cp.email, COALESCE(cp.phone_work,cp.phone) telefoonnr, cp.mobile gsm,
 	p2.lid, p2.donateur, p2.erflater, p2.commerciële_partner, p2.bos_partner, p2.major_donor, p2.schenker_grond,
 	p2.vrijwilliger, p2.bestuurder, p2.conservator, p2.aankoper,
-	--CASE WHEN u.id IN (513,260,487) THEN '' ELSE u.login END AS auteur, mcf.name status_fase, 
+	/*CASE WHEN u.id IN (513,260,487) THEN '' ELSE u.login END AS auteur,*/ mcf.name status_fase, mch.create_date::date,
 		p.street2 huisnaam,
 	CASE
 		WHEN c.id = 21 AND p.crab_used = 'true' THEN ccs.name
@@ -55,8 +55,9 @@ FROM res_partner p
 	--adres info
 	LEFT OUTER JOIN res_country_city_street ccs ON p.street_id = ccs.id
 	LEFT OUTER JOIN res_country_city cc ON p.zip_id = cc.id
-WHERE p.active AND mpt.name IN ('Partner Bos voor Iedereen')
+WHERE p.active AND mpt.name IN ('Bedrijven & verenigingen')
 	--AND dp.avgbedragperjaar >= 5000
+ORDER BY p.id, mch.create_date::date DESC	
 
 /*
 SELECT * FROM res_partner WHERE id = 366463 LIMIT 10
