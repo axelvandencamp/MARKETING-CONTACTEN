@@ -32,6 +32,24 @@ FROM res_partner p
 						JOIN res_crm_marketing_extra_info mei ON mei.info_id = mch.history_id AND mei.datetime::date = mch.datetime::date
 					WHERE mcf.id = 26) sq1
 				ON sq1.partner_id = p.id
+-----------------------------------
+-- opvolging response LEDENSERVICE
+-----------------------------------
+SELECT sq1.*, p.id, p.name, p.membership_state, p.active,
+	p.membership_start Lidmaatschap_startdatum, 
+	p.membership_stop Lidmaatschap_einddatum,  
+	p.membership_pay_date betaaldatum,
+	p.membership_renewal_date hernieuwingsdatum,
+	p.membership_end recentste_einddatum_lidmaatschap,
+	p.membership_cancel membership_cancel
+FROM res_partner p
+	JOIN (SELECT DISTINCT p.id partner_id, mcf.name status, mei.info, /*mei.datetime::date,*/ mch.datetime::date date
+					FROM res_partner p
+						JOIN res_crm_marketing_contact_history mch ON mch.history_id = p.id
+						JOIN res_crm_marketing_contact_fase mcf ON mcf.id = mch.contact_fase
+						JOIN res_crm_marketing_extra_info mei ON mei.info_id = mch.history_id AND mei.datetime::date = mch.datetime::date
+					WHERE mcf.id = 25) sq1
+				ON sq1.partner_id = p.id				
 -----------------------------
 -- opvolging response GIFTEN
 -----------------------------
