@@ -53,23 +53,28 @@ FROM res_partner p
 -----------------------------
 -- opvolging response GIFTEN
 -----------------------------
-SELECT DISTINCT sq1.*,
-		aml.account_id,
-		aml.date,
+SELECT DISTINCT sq1.* ,
+		--aml.account_id,
+		aml.date boekingsdatum,
 		EXTRACT(year FROM aml.date) jaar,
 		EXTRACT(month FROM aml.date) maand,
-		aml.debit, 
-		aml.credit,
+		--aml.debit, aml.credit,
 		(credit - debit) amount,
-		p.id p_id,
+		REPLACE(REPLACE(REPLACE(aml.name,';',','),chr(10),' '),chr(13), ' ') as description,
+		aml.ref,
+		--aaa.code,
+		COALESCE(aaa1.name,'') dimensie1,
+		COALESCE(aaa2.name,'') dimensie2,
+		COALESCE(aaa3.name,'') dimensie3,
+		COALESCE(COALESCE(aaa3.code,aaa2.code),aaa1.code) AS project_code,
+		COALESCE(COALESCE(aaa3.name,aaa2.name),aaa1.name) AS project,
+		--p.id p_id,
 		p.membership_state huidige_lidmaatschap_status,
 		p.membership_nbr lidnummer,
-		'[' || p.id::text || '] ' || p.name as partner,
-		p.name as naam,
+		--'[' || p.id::text || '] ' || p.name as partner,
+		--p.name as naam,
 		p.first_name as voornaam,
 		p.last_name as achternaam,
-		COALESCE(COALESCE(a2.name,a.name),'onbekend') afdeling,
-		p.membership_cancel as opzegdatum,
 		CASE
 			WHEN c.id = 21 AND p.crab_used = 'true' THEN ccs.name
 			ELSE p.street 
@@ -85,7 +90,7 @@ SELECT DISTINCT sq1.*,
 		CASE 
 			WHEN c.id = 21 THEN cc.name ELSE p.city 
 		END gemeente,
-		p.postbus_nbr postbus,
+		/*p.postbus_nbr postbus,
 		CASE
 			WHEN p.country_id = 21 AND substring(p.zip from '[0-9]+')::numeric BETWEEN 1000 AND 1299 THEN 'Brussel' 
 			WHEN p.country_id = 21 AND (substring(p.zip from '[0-9]+')::numeric BETWEEN 1500 AND 1999 OR substring(p.zip from '[0-9]+')::numeric BETWEEN 3000 AND 3499) THEN 'Vlaams Brabant'
@@ -97,31 +102,25 @@ SELECT DISTINCT sq1.*,
 			WHEN p.country_id = 166 THEN 'Nederland'
 			WHEN NOT(p.country_id IN (21,166)) THEN 'Buitenland niet NL'
 			ELSE 'andere'
-		END AS provincie,
+		END AS provincie,*/
 		c.name land,
-		p.birthday,
+		--p.birthday,
 		a5.name partner_naam,
+		COALESCE(COALESCE(a2.name,a.name),'onbekend') afdeling,
+		/*p.membership_cancel as opzegdatum,
 		COALESCE(p.address_state_id,0) adres_status,
 		CASE WHEN COALESCE(p.opt_out,'f') = 'f' THEN 'JA' WHEN p.opt_out = 't' THEN 'NEEN' ELSE 'JA' END email_ontvangen,
 		CASE WHEN COALESCE(p.opt_out_letter,'f') = 'f' THEN 'JA' WHEN p.opt_out_letter = 't' THEN 'NEEN' ELSE 'JA' END post_ontvangen,
 		p.iets_te_verbergen,
-		COALESCE(p.deceased,'f') overleden,
+		COALESCE(p.deceased,'f') overleden,*/
 		p.email,
-		CASE
+		/*CASE
 			WHEN p.gender = 'M' THEN 'Dhr.'
 			WHEN p.gender = 'V' THEN 'Mevr.'
 			ELSE pt.shortcut
 		END aanspreking,
-		p.gender AS geslacht,
+		p.gender AS geslacht,*/
 	 	pct.name,
-		REPLACE(REPLACE(REPLACE(aml.name,';',','),chr(10),' '),chr(13), ' ') as description,
-		aml.ref,
-		--aaa.code,
-		COALESCE(aaa1.name,'') dimensie1,
-		COALESCE(aaa2.name,'') dimensie2,
-		COALESCE(aaa3.name,'') dimensie3,
-		COALESCE(COALESCE(aaa3.code,aaa2.code),aaa1.code) AS project_code,
-		COALESCE(COALESCE(aaa3.name,aaa2.name),aaa1.name) AS project,
 		aa.code grootboekrek,
 		REPLACE(aa.name,';',',') grootboekrek_naam,
 		rc.name AS vzw,
@@ -140,7 +139,7 @@ SELECT DISTINCT sq1.*,
 					JOIN res_crm_marketing_contact_history mch ON mch.history_id = p.id
 					JOIN res_crm_marketing_contact_fase mcf ON mcf.id = mch.contact_fase
 					JOIN res_crm_marketing_extra_info mei ON mei.info_id = mch.history_id AND mei.datetime::date = mch.datetime::date
-				WHERE mcf.id = 24) sq1
+				WHERE mcf.id = 24 ) sq1
 			ON sq1.partner_id = p.id
 
 		JOIN res_company rc ON aml.company_id = rc.id 
