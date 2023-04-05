@@ -4,7 +4,7 @@ FROM res_partner p
 	JOIN res_crm_marketing_contact_history mch ON mch.history_id = p.id
 	JOIN res_crm_marketing_contact_fase mcf ON mcf.id = mch.contact_fase
 	JOIN res_crm_marketing_extra_info mei ON mei.info_id = mch.history_id AND mei.datetime::date = mch.datetime::date
---WHERE mcf.id IN (24,25,26)
+--WHERE mcf.id IN (24,25,26)  -- 24 - "DON verzending"; 25 - "LDS verzending"; 26 - "LDW verzending"
 WHERE mcf.id = 24
 ORDER by mcf.id
 ------------------------------------
@@ -14,7 +14,19 @@ FROM res_partner p
 	JOIN res_crm_marketing_contact_fase mcf ON mcf.id = mch.contact_fase
 	JOIN res_crm_marketing_extra_info mei ON mei.info_id = mch.history_id AND mei.datetime::date = mch.datetime::date
 WHERE mcf.id = 24
-
+------------------------------------------
+-- verzendlijst per ID
+------------------------------------------
+SELECT sq1.*, ROW_NUMBER() OVER (PARTITION BY sq1.partner_id ORDER BY sq1.date DESC) AS r
+FROM (
+	SELECT DISTINCT p.id partner_id, mcf.name, mei.info, mch.datetime::date date
+	FROM res_partner p
+		JOIN res_crm_marketing_contact_history mch ON mch.history_id = p.id
+		JOIN res_crm_marketing_contact_fase mcf ON mcf.id = mch.contact_fase
+		JOIN res_crm_marketing_extra_info mei ON mei.info_id = mch.history_id AND mei.datetime::date = mch.datetime::date
+	WHERE mcf.id IN (24,26)
+	) sq1
+ORDER BY sq1.partner_id
 -----------------------------------
 -- opvolging response LEDENWERVING
 -----------------------------------
@@ -31,7 +43,7 @@ FROM res_partner p
 						JOIN res_crm_marketing_contact_history mch ON mch.history_id = p.id
 						JOIN res_crm_marketing_contact_fase mcf ON mcf.id = mch.contact_fase
 						JOIN res_crm_marketing_extra_info mei ON mei.info_id = mch.history_id AND mei.datetime::date = mch.datetime::date
-					WHERE mcf.id = 26) sq1
+					WHERE mcf.id = 26 AND mei.info LIKE '%#16483') sq1
 				ON sq1.partner_id = p.id
 -----------------------------------
 -- opvolging response LEDENSERVICE
