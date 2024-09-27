@@ -60,7 +60,7 @@ FROM res_partner p JOIN
     JOIN res_country c ON p.country_id = c.id
     LEFT OUTER JOIN res_country_city_street ccs ON p.street_id = ccs.id
     LEFT OUTER JOIN res_country_city cc ON p.zip_id = cc.id
---WHERE mcf.id = 7
+WHERE p.active -- mcf.id = 7
 --------------------------------------
 -- erflaters zonder status
 ---------------------------------------
