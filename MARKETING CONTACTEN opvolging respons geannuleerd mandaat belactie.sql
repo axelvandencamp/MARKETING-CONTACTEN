@@ -15,7 +15,7 @@ FROM res_partner p
 						JOIN res_users u ON u.id = mei.create_uid
 					WHERE mcf.id = 33 /*AND mei.info LIKE '%#16483'*/) sq1
 				ON sq1.partner_id = p.id
-WHERE sq1.date > '2025-01-01'	
+WHERE sq1.datum > '2025-01-01'	
 
 
 
