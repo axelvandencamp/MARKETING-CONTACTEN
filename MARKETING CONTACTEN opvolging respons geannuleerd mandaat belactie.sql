@@ -6,7 +6,9 @@ SELECT sq1.*, p.id, p.name, p.membership_state, p.active,
 	p.membership_end recentste_einddatum_lidmaatschap,
 	p.membership_cancel membership_cancel
 FROM res_partner p
-	JOIN (SELECT DISTINCT p.id partner_id, mcf.name fase, mei.info, u.login, mch.datetime::date datum,
+	JOIN (SELECT DISTINCT p.id partner_id, mcf.name fase, 
+					REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(mei.info,chr(9),''),chr(10),''),chr(11),''),chr(12),''),chr(13),'') mei_info, 
+					u.login, mch.datetime::date datum,
 					ROW_NUMBER() OVER (PARTITION BY p.id ORDER BY mch.datetime ASC) AS r
 					FROM res_partner p
 						JOIN res_crm_marketing_contact_history mch ON mch.history_id = p.id
