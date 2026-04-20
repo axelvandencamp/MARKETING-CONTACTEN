@@ -11,6 +11,7 @@ SELECT * FROM res_crm_marketing_extra_info -- WHERE info_id = 21362
 SELECT * FROM res_crm_marketing_sector
 
 SELECT * FROM res_users u WHERE u.login like 'ward%'
+SELECT * FROM res_users u WHERE u.id IN (1708,1692,270)
 
 SELECT id, name FROM res_crm_marketing_partner_type
 
@@ -42,12 +43,14 @@ WHERE NOT(info = 'n/a') --AND p_type_id = 1
 ORDER BY SQ1.id, SQ1._date DESC	
 
 -- ophalen verzendlijst --
-SELECT p.id, p.name, mptr.name p_type_id, mpt.name partner_type, mch.datetime::date _date, mcf.name status,
-	SQ1.*
+SELECT p.id, p.name, mptr.name p_type_id, mpt.name partner_type, mch.datetime::date _date, mcf.name status
+	--, SQ1.*
 FROM res_partner p
 	JOIN crm_marketing_partner_type_rel mptr ON mptr.partner_type_id = p.id
 	JOIN res_crm_marketing_partner_type mpt ON mpt.id = mptr.name
 	LEFT OUTER JOIN res_crm_marketing_contact_history mch ON mch.history_id = p.id
 	LEFT OUTER JOIN res_crm_marketing_contact_fase mcf ON mcf.id = mch.contact_fase
-	JOIN marketing._crm_partnerinfo() SQ1 ON SQ1.partner_id = p.id	
-WHERE mptr.name = 1
+	--JOIN marketing._crm_partnerinfo() SQ1 ON SQ1.partner_id = p.id	
+--WHERE mptr.name = 1
+--WHERE mcf.id IN (1043,1042,1041,1040)
+WHERE mpt.id IN (1016,1017,1018,1019)
