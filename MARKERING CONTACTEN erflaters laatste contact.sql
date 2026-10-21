@@ -9,7 +9,8 @@ FROM (
 	FROM marketing._m_dwh_partners dwh_p
 		JOIN
 		(
-	
+	--SELECT * FROM (
+	--/*
 			-- "extra info" selectie
 			SELECT p.id partner_id, p.name, mei.id mei_id, mei.info_id mei_info_id, mei.info, COALESCE(mei.datetime::date,'1900-01-01') datum, 
 				
@@ -19,16 +20,17 @@ FROM (
 			WHERE mei.partner_type = 2 -- "erflater"
 				AND p.active
 						
-			UNION ALL
+			UNION ALL--*/
 			
 			-- "fase" selectie
-			SELECT p.id, p.name, mch.id mch_id, mch.history_id mch_history_id, mcf.name status, COALESCE(mch.datetime::date,'1900-01-01') datum,  
+			SELECT p.id partner_id, p.name, mch.id mch_id, mch.history_id mch_history_id, mcf.name status, COALESCE(mch.datetime::date,'1900-01-01') datum,  
 				--EXTRACT(YEAR FROM AGE(now()::date,mch.datetime)) jaar,
 				ROW_NUMBER() OVER (PARTITION BY mch.history_id ORDER BY mch.datetime::date DESC) AS r
 			FROM res_partner p
 				JOIN res_crm_marketing_contact_history mch ON mch.history_id = p.id
 				JOIN res_crm_marketing_contact_fase mcf ON mcf.id = mch.contact_fase
 			WHERE mch.partner_type = 2 -- "erflater" 
+				AND NOT(mcf.name = 'LEG_verzending')
 				AND p.active
 	
 		) sq1
@@ -37,7 +39,7 @@ FROM (
 		AND sq1.datum > '1900-01-01'
 		AND dwh_p.overleden = 'false'
 		AND dwh_p.nooit_contact = 'false'
-		AND NOT(sq1.info = 'LEG_verzending')
+		
 		--AND dwh_p.partner_id = 164648 -- test_ID
 	GROUP BY sq1. partner_id, sq1.name, sq1.info, sq1.datum
 		, dwh_p.geen_post, dwh_p.geen_mail
